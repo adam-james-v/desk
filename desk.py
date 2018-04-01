@@ -252,4 +252,4 @@ desk = Desk()
 # tray = CableTray()
 # cqv.show_svg(leg.make())
 
-desk.exporter('gltf')('desk.gltf', embed=True)
+desk.exporter('gltf')('web_view/result.gltf', embed=True)

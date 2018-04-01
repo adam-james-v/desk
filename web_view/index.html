@@ -3,7 +3,9 @@
   <head>
     <title>CQ View</title>
     <script src="effect.js"></script>
-    <script src="three.min.js"></script>
+    <!-- <script src="three.min.js"></script> -->
+    <script src=https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.min.js></script>
+    <script src="js/GLTFLoader.js"></script>
     <script src="three.etc.min.js"></script>
     <script src="js/controls/OrbitControls.js"></script>
     
@@ -166,17 +168,19 @@ function init() {
     axesScene.add( refCubeMesh );
     
     // Loader
-    loader = new THREE.JSONLoader();
+    loader = new THREE.GLTFLoader();
     loader.load(
         // resource URL
-        'assembly.json',
+        'result.gltf',
 
         // onLoad callback
-        function ( geometry, materials ) {
-            material = new THREE.MeshPhongMaterial( );
-            material.color = materials[0].color;
-            geometry.scale(0.5, 0.5, 0.5);
-            object = new THREE.Mesh( geometry, material );
+        function ( gltf ) {
+            var object = gltf.scene;
+            object.traverse( function ( node ) {
+                if ( node.material ) {
+                    node.material.needsUpdate = true;
+                }
+            });
             scene.add( object );
         },
 
@@ -188,13 +192,14 @@ function init() {
         // onError callback
         function( err ) {
             console.log( 'Failed to load geometry.' );
+            console.log( err );
         }
     );
 
     // Lights
-    var ambientLight = new THREE.AmbientLight( 0xffffff, 0.35 );
+    var ambientLight = new THREE.AmbientLight( 0xffffff, 0.5 );
     scene.add( ambientLight );
-    hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+    hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.86 );
     // hemiLight.color.setHSL( 0.5, 0.95, 0.55 );
     hemiLight.groundColor.setHSL( 0.95, 1, 0.005 );
     hemiLight.position.set( 300, 500, 100 );
@@ -276,7 +281,7 @@ function orient(x, y, z) {
 function render() {
 
     controls.update();
-    
+    // loader.Shaders.update(scene, camera);
     axesCamera.position.copy( camera.position );
     axesCamera.position.sub( controls.target );
     axesCamera.position.setLength( 200 );
