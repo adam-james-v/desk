@@ -11,12 +11,12 @@
     
     <!-- Following refresh script found:
     https://stackoverflow.com/a/37469774 -->
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>
         var previous = null;
         var current = null;
         setInterval(function() {
-            $.getJSON("assembly.json", function(json) {
+            $.getJSON("result.gltf", function(json) {
                 current = JSON.stringify(json);            
                 if (previous && current && previous !== current) {
                     console.log('refresh');
@@ -25,7 +25,7 @@
                 previous = current;
             });                       
         }, 300);   
-    </script> -->
+    </script>
     
     <style>
       html, body {

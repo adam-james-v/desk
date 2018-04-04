@@ -18,10 +18,10 @@ class Surface(cqparts.Part):
     width = par.PositiveFloat(36.0, doc="width of the surface")
     depth = par.PositiveFloat(16.0, doc="depth of the surface")
     thickness = par.PositiveFloat(0.875, doc="thickness of the surface")
-    
+
     _render = render_props(template='wood')
     def make(self):
-        result = (cq.Workplane('XY')
+        result = (cq.Workplane('ZX')
             .box(self.width, self.thickness, self.depth, centered=(True, False, True))
         )
         return result
@@ -31,7 +31,7 @@ class Surface(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(0, self.thickness, 0),
            xDir=(0, 1, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
     @property
@@ -39,39 +39,39 @@ class Surface(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.width/2.0, 0, self.depth/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, 0, -1) 
+           normal=(0, 0, -1)
         ))
 
-    @property        
+    @property
     def mate_L1(self):
         return Mate(self, CoordSystem(
            origin=(self.width/2.0, self.thickness, self.depth/2.0),
            xDir=(0, 1, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
-    @property    
+    @property
     def mate_L2(self):
         return Mate(self, CoordSystem(
            origin=(self.width/2.0, self.thickness, -self.depth/2.0),
            xDir=(0, 1, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
-    @property        
+    @property
     def mate_R1(self):
         return Mate(self, CoordSystem(
            origin=(-self.width/2.0, self.thickness, self.depth/2.0),
            xDir=(0, 1, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
-    @property                
+    @property
     def mate_R2(self):
         return Mate(self, CoordSystem(
            origin=(-self.width/2.0, self.thickness, -self.depth/2.0),
            xDir=(0, 1, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
 desk_top = Surface(width=W, depth=D)
@@ -100,9 +100,9 @@ class Tube(cqparts.Part):
         )
         inner = (cq.Workplane('XY')
             .box(
-                self.length, 
-                self.height - self.thickness*2.0, 
-                self.base - self.thickness*2.0, 
+                self.length,
+                self.height - self.thickness*2.0,
+                self.base - self.thickness*2.0,
                 centered=(False, True, True))
             .edges("|X").fillet(inner_radius)
         )
@@ -114,7 +114,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(0, 0, 0),
            xDir=(1, 0, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
     @property
@@ -122,7 +122,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, 0, 0),
            xDir=(1, 0, 0),
-           normal=(0, -1, 0) 
+           normal=(0, -1, 0)
         ))
 
     @property
@@ -130,7 +130,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, -self.height/2.0, self.base/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, -1, 0) 
+           normal=(0, -1, 0)
         ))
 
     @property
@@ -138,7 +138,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, -self.height/2.0, -self.base/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, -1, 0) 
+           normal=(0, -1, 0)
         ))
 
     @property
@@ -146,7 +146,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, self.height/2.0, self.base/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, -1, 0) 
+           normal=(0, -1, 0)
         ))
 
     @property
@@ -154,7 +154,7 @@ class Tube(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, self.height/2.0, -self.base/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, -1, 0) 
+           normal=(0, -1, 0)
         ))
 
 
@@ -182,16 +182,16 @@ class CableTray(cqparts.Part):
         )
         inner = (cq.Workplane('XY')
             .box(
-                self.length, 
-                self.height - self.thickness*2.0, 
-                self.base - self.thickness*2.0, 
+                self.length,
+                self.height - self.thickness*2.0,
+                self.base - self.thickness*2.0,
                 centered=(False, True, True))
         )
         gap = (cq.Workplane('XY')
             .box(
-                self.length, 
-                self.gap_width, 
-                self.gap_width, 
+                self.length,
+                self.gap_width,
+                self.gap_width,
                 centered=(False, True, True))
                 .findSolid().translate((0, self.height/2.0, 0))
         )
@@ -203,7 +203,7 @@ class CableTray(cqparts.Part):
         return Mate(self, CoordSystem(
            origin=(self.length, self.height/2.0, self.base/2.0),
            xDir=(-1, 0, 0),
-           normal=(0, 0, 1) 
+           normal=(0, 0, 1)
         ))
 
 
@@ -215,7 +215,7 @@ class Desk(cqparts.Assembly):
             'Leg2': Tube(length=H),
             'Leg3': Tube(length=H),
             'Leg4': Tube(length=H),
-            'Tray': CableTray(length=W),
+            #'Tray': CableTray(length=W),
         }
         return components
 
@@ -238,13 +238,8 @@ class Desk(cqparts.Assembly):
                 self.components['Leg4'].mate_corner04,
                 self.components['TableTop'].mate_R2,
             ),
-            Coincident(
-                self.components['Tray'].mate_top,
-                self.components['TableTop'].mate_edge,
-            ),
         ]
         return constraints
-
 
 
 
