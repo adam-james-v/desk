@@ -93,16 +93,16 @@ class Tube(cqparts.Part):
         outer = (cq.Workplane('XY')
             .box(
                 self.length,
-                self.height,
                 self.base,
+                self.height,
                 centered=(False, True, True))
             .edges("|X").fillet(outer_radius)
         )
         inner = (cq.Workplane('XY')
             .box(
                 self.length,
-                self.height - self.thickness*2.0,
                 self.base - self.thickness*2.0,
+                self.height - self.thickness*2.0,
                 centered=(False, True, True))
             .edges("|X").fillet(inner_radius)
         )
@@ -157,6 +157,7 @@ class Tube(cqparts.Part):
            normal=(0, -1, 0)
         ))
 
+
 class Bearing(cqparts.Part):
     """Creates a roller bearing"""
     # PARAMS
@@ -191,6 +192,40 @@ class Bearing(cqparts.Part):
            normal=(0, 0, -1)
         ))
 
+
+class PivotArm(cqparts.Part):
+    # hole_diameter = PositiveFloat(20, "diameter for shaft")
+    inner = par.Boolean(True)    
+    length = par.PositiveFloat(36.0)
+    slot_thickness = Bearing.thickness
+    slot_depth = Bearing.outer_diameter
+    
+    def make(self):
+        if self.inner:
+            b = 1.0
+        else:
+            b = 0.5
+        #TODO: use proper inheritance here
+        obj = (Tube(base=b, height=1.0, length=self.length).make()
+            .faces('>Y').workplane()
+            .moveTo(0, 0).circle(0.25)
+            .moveTo(-(self.length/2.0 - 0.5), 0).circle(0.25)
+            .moveTo( (self.length/2.0 - 0.5), 0).circle(0.25)
+            .cutThruAll()
+        )
+        if self.inner:
+            result = (obj
+                .faces('<X').workplane()
+                .rect(self.slot_thickness, self.height)
+                .cutBlind(-self.slot_depth)
+            )
+        else:
+            result = obj
+        return result
+
+
+
+
 class Bushing(cqparts.Part):
     """Creates a bushing for the roller bearing"""
     # PARAMS
@@ -222,6 +257,14 @@ class Bushing(cqparts.Part):
            normal=(0, -1, 0)
         ))
 
+    @property
+    def mate_concentric_outer(self):
+        return Mate(self, CoordSystem(
+           origin=(0, 0, -(self.lip_thickness + 0.1)), # don't hardcode the offset???
+           xDir=(1, 0, 0),
+           normal=(0, 1, 0)
+        ))
+
 
 class Bolt(cqparts.Part):
     """Creates a bolt"""
@@ -242,6 +285,14 @@ class Bolt(cqparts.Part):
             .fillet(0.1)
         )
         return result
+
+    @property
+    def mate_concentric(self):
+        return Mate(self, CoordSystem(
+           origin=(0, 0, -self.diameter*0.55),
+           xDir=(1, 0, 0),
+           normal=(0, 0, 1)
+        ))
     
 
 class Nut(cqparts.Part):
@@ -259,6 +310,14 @@ class Nut(cqparts.Part):
             .extrude(self.thickness)           
         )
         return result
+
+    @property
+    def mate_concentric(self):
+        return Mate(self, CoordSystem(
+           origin=(0, 0, -self.thickness),
+           xDir=(1, 0, 0),
+           normal=(0, 0, 1)
+        ))
     
 
 class BearingASM(cqparts.Assembly):
@@ -282,7 +341,15 @@ class BearingASM(cqparts.Assembly):
             Coincident(
                 self.components['bushingB'].mate_origin,
                 self.components['bearing'].mate_concentric_back,
-            ),     
+            ),
+            Coincident(
+                self.components['bolt'].mate_concentric,
+                self.components['bushingA'].mate_concentric_outer,
+            ),  
+            Coincident(
+                self.components['nut'].mate_concentric,
+                self.components['bushingB'].mate_concentric_outer,
+            ),      
         ]
         return constraints
 
@@ -322,8 +389,7 @@ class Desk(cqparts.Assembly):
 
 
 
-desk = Desk()
-# tray = CableTray()
 # cqv.show_svg(leg.make())
 
-Nut().exporter('gltf')('web_view/result.gltf', embed=True)
+PivotArm(inner=False).exporter('gltf')('web_view/result.gltf', embed=True)
+# print(Bearing.outer_diameter())
